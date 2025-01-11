@@ -1,0 +1,1 @@
+export const keywordSelector = (state) => state.search.keyword;
