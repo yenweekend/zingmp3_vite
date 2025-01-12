@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter as Router } from "react-router-dom";
-import GlobalStyle from "./Theme/GlobalStyled.jsx";
+import GlobalStyle from "./themes/GlobalStyled.jsx";
 import { ToastContainer, Bounce, Slide } from "react-toastify";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store, persistor } from "./redux/store/index.jsx";
