@@ -16,6 +16,7 @@ import HISTORY_KEY, {
   addToHistory,
 } from "../helpers/history";
 import CollectSongBtn from "./CollectSongBtn";
+
 const SongList = ({
   song,
   children,

@@ -19,11 +19,13 @@ import {
   deleteMVFromCollection,
   getMVCollection,
 } from "../apis/mongoose-api/mv.api";
+import { Modal } from "antd";
 import toast from "../helpers/notification";
 import Spinner from "../components/Spinner";
 import { CollectVideoBtn } from "../components";
 import { useSelector } from "react-redux";
 import { isLoginSelector } from "../redux/auth/selector";
+
 let timer;
 const Videos = () => {
   const isLogin = useSelector(isLoginSelector);
@@ -59,7 +61,8 @@ const Videos = () => {
     enabled: !!id,
   });
   const {
-    isPending: isPendingMV,
+    isPending: isPendingCollectMV,
+    isLoading: isLoadingCollectMV,
     isError: isErrorMV,
     error: errorMV,
     data: mvcollection,
@@ -206,6 +209,7 @@ const Videos = () => {
   const handleVolMouseUp = useCallback(() => {
     volumebarRef.current.removeEventListener("mousemove", draggbleVolume);
   }, []);
+
   useEffect(() => {
     if (videoRef.current && videoSrc) {
       videoRef.current.pause();
@@ -229,7 +233,7 @@ const Videos = () => {
       videoRef.current.volume = volumeValue;
     }
   }, [volumeValue]);
-  if (isPending || isPendingMV) {
+  if (isPending) {
     return (
       <>
         <div className="w-screen h-screen bg-black">
@@ -241,7 +245,6 @@ const Videos = () => {
   if (isError || isErrorMV) {
     return <span>Error: {error.message || errorMV.error}</span>;
   }
-  console.log(data);
   return (
     <VideoStyled className={`animate-appear`}>
       <div className="relative w-full h-full overflow-hidden">
@@ -281,32 +284,77 @@ const Videos = () => {
                               {data?.data?.data["artists"][0].name}
                             </div>
                           </div>
-                          <div className="media_right flex items-center">
-                            <CollectVideoBtn
-                              videoData={data.data.data}
-                              mvcollection={mvcollection.data.favorite}
-                            />
-                            <Popover
-                              title="Thêm vào thư viện"
-                              trigger={"hover"}
-                              color="#363636"
-                              placement="bottom"
-                            >
-                              <div className="icon_div h-10 w-10 rounded-[50%] flex items-center justify-center">
-                                <icons.notemusic className="icon "></icons.notemusic>
+                          {isErrorMV || isLoadingCollectMV || !mvcollection ? (
+                            <div className="media_right flex items-center">
+                              <Popover
+                                title="Thêm vào thư viện"
+                                trigger={"hover"}
+                                color="#363636"
+                                placement="bottom"
+                              >
+                                <div
+                                  className="icon_div h-10 w-10 rounded-[50%] flex items-center justify-center"
+                                  onClick={() => {
+                                    alert("Hãy đăng nhập để trải nghiệm");
+                                  }}
+                                >
+                                  <icons.heart
+                                    className={"text-[#fff] text-[20px]"}
+                                  ></icons.heart>
+                                </div>
+                              </Popover>
+
+                              <Popover
+                                title="Thêm vào thư viện"
+                                trigger={"hover"}
+                                color="#363636"
+                                placement="bottom"
+                              >
+                                <div className="icon_div h-10 w-10 rounded-[50%] flex items-center justify-center">
+                                  <icons.notemusic className="icon "></icons.notemusic>
+                                </div>
+                              </Popover>
+                              <Popover
+                                title="Khác"
+                                trigger={"hover"}
+                                color="#363636"
+                                placement="bottom"
+                              >
+                                <div className="icon_div h-10 w-10 rounded-[50%] flex items-center justify-center">
+                                  <icons.more className="icon "></icons.more>
+                                </div>
+                              </Popover>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="media_right flex items-center">
+                                <CollectVideoBtn
+                                  videoData={data.data.data}
+                                  mvcollection={mvcollection.data.favorite}
+                                />
+                                <Popover
+                                  title="Thêm vào thư viện"
+                                  trigger={"hover"}
+                                  color="#363636"
+                                  placement="bottom"
+                                >
+                                  <div className="icon_div h-10 w-10 rounded-[50%] flex items-center justify-center">
+                                    <icons.notemusic className="icon "></icons.notemusic>
+                                  </div>
+                                </Popover>
+                                <Popover
+                                  title="Khác"
+                                  trigger={"hover"}
+                                  color="#363636"
+                                  placement="bottom"
+                                >
+                                  <div className="icon_div h-10 w-10 rounded-[50%] flex items-center justify-center">
+                                    <icons.more className="icon "></icons.more>
+                                  </div>
+                                </Popover>
                               </div>
-                            </Popover>
-                            <Popover
-                              title="Khác"
-                              trigger={"hover"}
-                              color="#363636"
-                              placement="bottom"
-                            >
-                              <div className="icon_div h-10 w-10 rounded-[50%] flex items-center justify-center">
-                                <icons.more className="icon "></icons.more>
-                              </div>
-                            </Popover>
-                          </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

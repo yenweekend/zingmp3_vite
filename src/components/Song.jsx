@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { setQueueSong } from "../redux/queueSong/slice";
 import generateUniqueId from "generate-unique-id";
 import CollectSongBtn from "./CollectSongBtn";
+
 const Song = ({
   dimension,
   fontSize,

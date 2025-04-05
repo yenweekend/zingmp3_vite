@@ -1,13 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 const queueSongSlice = createSlice({
-  name: "prevOpenUrl",
+  name: "queueSong",
   initialState: {
     queue_song: {},
     cursongEncodeId: null,
     currentId: null,
   },
   reducers: {
-    resetQueueSong: (state, actions) => {
+    resetQueueSong: (state) => {
       state.queue_song = {};
       state.cursongEncodeId = null;
       state.currentId = null;

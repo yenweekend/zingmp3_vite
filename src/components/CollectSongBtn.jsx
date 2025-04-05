@@ -75,6 +75,7 @@ const CollectSongBtn = ({ song, textWhite = true, currentSong = false }) => {
     e.stopPropagation();
     setIsModalOpen(false);
   };
+  console.log(songCollection);
   return songCollection.some((item) => item.encodeId === song.encodeId) ? (
     <>
       <Popover title="Xóa khỏi thư viện" trigger="hover" color="#363636">

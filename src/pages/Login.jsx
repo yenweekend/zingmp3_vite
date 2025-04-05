@@ -7,24 +7,25 @@ import { Link } from "react-router-dom";
 import { login } from "../apis/mongoose-api/auth.api";
 import setAuthToken from "../services/setAuthToken";
 import { setAccount } from "../redux/auth/slice";
+import { useForm } from "react-hook-form";
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
-  const [error, setError] = useState({
-    usernameError: "",
-    passwordError: "",
-  });
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const handleChange = useCallback(
-    (e) => {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+  const {
+    register,
+    setError,
+    clearErrors,
+    handleSubmit,
+    formState: { dirtyFields, errors },
+  } = useForm({
+    defaultValues: {
+      username: "",
+      password: "",
     },
-    [formData]
-  );
+  });
+
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: (response) => {
@@ -47,27 +48,21 @@ const Login = () => {
       navigate("/");
     },
     onError: (error) => {
-      console.log(error.message);
+      setError("loginError", {
+        type: "manual",
+        message: error.response.data.message,
+      });
     },
   });
-  const handleLogin = useCallback(
-    (e) => {
-      e.preventDefault();
-      const isEmpty = Object.values(formData).some((value) => value === "");
-      if (isEmpty) {
-        console.log("ko để trường trống");
-      } else {
-        mutation.mutate(formData);
-      }
-    },
-    [formData]
-  );
+  const onSubmit = async (data) => {
+    mutation.mutate(data);
+  };
   return (
     <div className="font-[sans-serif]">
       <div className="min-h-screen flex flex-col items-center justify-center">
         <div className="grid md:grid-cols-2 items-center gap-4 max-md:gap-8 max-w-6xl max-md:max-w-lg w-full p-4 m-4 shadow-[0_0_10px_-3px_rgba(6,81,237,0.3)] rounded-md">
           <div className="md:max-w-md w-full px-4 py-4">
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-12">
                 <h3 className="text-gray-800 text-3xl font-bold">Đăng nhập</h3>
                 <p className="text-sm mt-4 text-gray-800">
@@ -87,13 +82,21 @@ const Login = () => {
                 </label>
                 <div className="relative flex items-center">
                   <input
-                    name="username"
+                    {...register("username", {
+                      required: {
+                        value: true,
+                        message: "Vui lòng điền tên đăng nhập!",
+                      },
+                    })}
                     type="text"
-                    required
-                    className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none"
+                    className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none "
+                    onChange={() => {
+                      if (errors.loginError) {
+                        clearErrors("loginError");
+                      }
+                    }}
                     placeholder="Điền tên đăng nhập"
                     autoComplete="off"
-                    onChange={handleChange}
                   />
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -128,6 +131,11 @@ const Login = () => {
                     </g>
                   </svg>
                 </div>
+                {errors?.username && (
+                  <p className="text-red-700 text-[14px] font-medium">
+                    {errors.username.message}
+                  </p>
+                )}
               </div>
 
               <div className="mt-8">
@@ -136,13 +144,25 @@ const Login = () => {
                 </label>
                 <div className="relative flex items-center">
                   <input
-                    name="password"
+                    {...register("password", {
+                      required: {
+                        value: true,
+                        message: "Vui lòng điền mật khẩu !",
+                      },
+                      minLength: {
+                        value: 6,
+                        message: "Mật khẩu ít nhất 6 kí tự !",
+                      },
+                    })}
                     type={isPasswordVisible ? "text" : "password"}
-                    required
                     className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none"
+                    onChange={() => {
+                      if (errors.loginError) {
+                        clearErrors("loginError");
+                      }
+                    }}
                     placeholder="Nhập password"
                     autoComplete="off"
-                    onChange={handleChange}
                   />
                   <div
                     className="hidden_password absolute right-2 cursor-pointer"
@@ -171,12 +191,21 @@ const Login = () => {
                     )}
                   </div>
                 </div>
+                {errors?.password && (
+                  <p className="text-red-700 text-[14px] font-medium">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
+              {errors?.loginError && (
+                <p className="text-red-700 text-[14px] font-medium">
+                  {errors.loginError.message}
+                </p>
+              )}
               <div className="mt-12">
                 <button
-                  type="button"
+                  type="submit"
                   className="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                  onClick={handleLogin}
                 >
                   Đăng nhập
                 </button>

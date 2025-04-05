@@ -351,13 +351,13 @@ body {
   border-left-color: #fff;
   border-bottom: 2px solid #fff;
   border-right: 2px solid #fff;
+  transform: translate(-50%, -63%) rotate(45deg);
   border-top-color: #fff;
   height: 50%;
   width: 30%;
   position: absolute;
   top: 47%;
   left: 54%;
-  transform: translate(-50%, -63%) rotate(45deg);
 }
 
 .show-all {

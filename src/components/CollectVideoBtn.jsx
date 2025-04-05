@@ -11,7 +11,7 @@ import { isLoginSelector } from "../redux/auth/selector";
 import { useSelector } from "react-redux";
 import toast from "../helpers/notification";
 import icons from "../utils/icons";
-const CollectSongBtn = ({ videoData, mvcollection }) => {
+const CollectVideoBtn = ({ videoData, mvcollection }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isLogin = useSelector(isLoginSelector);
   const queryClient = useQueryClient();
@@ -139,4 +139,4 @@ const CollectSongBtn = ({ videoData, mvcollection }) => {
   );
 };
 
-export default CollectSongBtn;
+export default CollectVideoBtn;

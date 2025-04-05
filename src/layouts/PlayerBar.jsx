@@ -1,9 +1,8 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import moment from "moment";
-import { Icons } from "react-toastify";
 import icons from "../utils/icons";
 import { SingerName } from "../components";
 import { Popover } from "antd";
@@ -12,13 +11,28 @@ import RightSideBar from "./RightSideBar";
 import {
   queueSongSelector,
   currentIdSelector,
+  cursongEncodeIdSelector,
 } from "../redux/queueSong/selector";
 import { useSelector } from "react-redux";
+import { useQuery } from "@tanstack/react-query";
+import { getSongAudio } from "../apis/mongoose-api/song.api";
+import { Loader2, Pause } from "lucide-react";
+import { setIsPlaying } from "../redux/song/slice";
+import { useDispatch } from "react-redux";
+const PossibleSongAudio = [
+  "https://a128-z3.zmdcdn.me/2667eeae76859ab34357aff014bc0811?authen=exp=1743990524~acl=/2667eeae76859ab34357aff014bc0811*~hmac=7465b6137e3ebfad6827b7f0b3a0dbf2",
+  "https://vnno-ne-1-tf-a128-z3.zmdcdn.me/d9d28825e1436fbd1cd1cd693dcf95b7?authen=exp=1743990238~acl=/d9d28825e1436fbd1cd1cd693dcf95b7*~hmac=d933d0f7a206b9bf74d37aaf335edc12",
+  "https://a128-z3.zmdcdn.me/8332830835fd5b9f7d9a2131305475c9?authen=exp=1743991070~acl=/8332830835fd5b9f7d9a2131305475c9*~hmac=75d9571fe2a9c98cdc2676168ff22efd",
+];
 const PlayerBar = () => {
+  const dispatch = useDispatch();
   const queueSong = useSelector(queueSongSelector);
   const currentId = useSelector(currentIdSelector);
+  const [audio, setAudio] = useState(PossibleSongAudio[0]);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isAppear, setIsAppear] = useState(false);
+  const isPlaying = useSelector((state) => state.songState.isPlaying);
+  const [duration, setDuration] = useState(0);
   const viewRef = useRef(null);
   const audioRef = useRef();
   const progressRef = useRef();
@@ -31,21 +45,21 @@ const PlayerBar = () => {
     const mouseX = e.clientX - progressRect.left;
     const timeLineWidth = progressRect.width;
     progressFillRef.current.style.width = `${mouseX}px`;
-    // audioRef.current.currentTime =
-    //   (mouseX / timeLineWidth) * audioRef.current.duration;
-    // curtimeRef.current.textContent = moment
-    //   .utc(audioRef.current.currentTime * 1000)
-    //   .format("mm:ss");
+    audioRef.current.currentTime =
+      (mouseX / timeLineWidth) * audioRef.current.duration;
+    curtimeRef.current.textContent = moment
+      .utc(audioRef.current.currentTime * 1000)
+      .format("mm:ss");
   }, []);
   const handleProgress = useCallback((e) => {
     const progressRect = progressRef.current.getBoundingClientRect();
     const timeLineWidth = progressRect.width;
     const offsetX = e.clientX - progressRect.left;
     progressFillRef.current.style.width = `${offsetX}px`;
-    // if (audioRef && audioRef.current) {
-    //   audioRef.current.currentTime =
-    //     (offsetX / timeLineWidth) * audioRef.current.duration;
-    // }
+    if (audioRef && audioRef.current) {
+      audioRef.current.currentTime =
+        (offsetX / timeLineWidth) * audioRef.current.duration;
+    }
   });
   const handleMouseDown = useCallback(() => {
     progressRef.current.addEventListener("mousemove", draggbleProgress);
@@ -59,8 +73,8 @@ const PlayerBar = () => {
     const mouseX = e.clientX - volumeRect.left;
     progressVolFill.current.style.width = `${mouseX}px`;
     const volumeValue = Math.floor((mouseX / volumeBarWidth) * 100) / 100;
-    // audioRef.current.volume =
-    //   volumeValue > 1 ? 1 : volumeValue < 0 ? 0 : volumeValue;
+    audioRef.current.volume =
+      volumeValue > 1 ? 1 : volumeValue < 0 ? 0 : volumeValue;
   }, []);
   const handleVolMouseDown = useCallback(() => {
     progressVol.current.addEventListener("mousemove", draggbleVolume);
@@ -68,6 +82,29 @@ const PlayerBar = () => {
   const handleVolMouseUp = useCallback(() => {
     progressVol.current.removeEventListener("mousemove", draggbleVolume);
   }, []);
+  const handleMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+  const handleEnd = () => {
+    const index = PossibleSongAudio.indexOf(audio);
+    if (index === PossibleSongAudio.length - 1) {
+      setAudio(PossibleSongAudio[0]);
+    } else {
+      setAudio(PossibleSongAudio[index + 1]);
+    }
+  };
+  useEffect(() => {
+    if (progressVolFill.current) {
+      progressVolFill.current.style.width = `70px`;
+    }
+  }, []);
+  // const { isPending, data, isError, error, isLoading, isSuccess } = useQuery({
+  //   queryFn: () => getSongAudio(encodeId),
+  //   queryKey: ["audio", encodeId], // Add encodeId to the queryKey
+  //   enabled: !!encodeId,
+  // });
   return (
     <PlayerBarStyled className="left-0 right-0 flex items-center fixed bottom-0 h-[90px] px-5 layout-bg z-30">
       <div className="  w-[30%] flex-shrink-0 flex-grow-0">
@@ -141,15 +178,50 @@ const PlayerBar = () => {
             ></icons.shuffle>
           </div>
           <div
-            className={`cursor-pointer next w-8 h-8   grid place-items-center px-[3px] mx-[7px] rounded-[50%] hover:bg-white hover:bg-opacity-20 relative group `}
+            className={`cursor-pointer next w-8 h-8   grid place-items-center px-[3px] mx-[7px] rounded-[50%] hover:bg-white hover:bg-opacity-20 relative group`}
+            onClick={() => {
+              const index = PossibleSongAudio.indexOf(audio);
+
+              if (index === 0) {
+                setAudio(PossibleSongAudio[PossibleSongAudio.length - 1]);
+              } else {
+                setAudio(PossibleSongAudio[index - 1]);
+              }
+            }}
           >
             <icons.backward className="text-[20px] leading-[66%] icons "></icons.backward>
           </div>
-          <div className="cursor-pointer modify_active  w-9 h-9 mx-[7px] grid place-items-center p-[3px] border border-solid play_btn rounded-[50%]">
-            <icons.playsharp className="text-[22px] leading-[66%] icons  ml-[2px] "></icons.playsharp>
+
+          <div
+            className="cursor-pointer modify_active  w-9 h-9 mx-[7px] grid place-items-center p-[3px] border border-solid play_btn rounded-[50%]"
+            onClick={() => {
+              if (audioRef.current) {
+                if (isPlaying) {
+                  audioRef.current.pause();
+                } else {
+                  audioRef.current.play();
+                }
+                dispatch(setIsPlaying(!isPlaying));
+              }
+            }}
+          >
+            {!isPlaying ? (
+              <icons.playsharp className="text-[22px] leading-[66%] icons  ml-[2px] "></icons.playsharp>
+            ) : (
+              <Pause stroke="#fff" strokeWidth={1} />
+            )}
           </div>
+
           <div
             className={`cursor-pointer next w-8 h-8   grid place-items-center px-[3px] mx-[7px] rounded-[50%] hover:bg-white hover:bg-opacity-20 relative group `}
+            onClick={() => {
+              const index = PossibleSongAudio.indexOf(audio);
+              if (index === PossibleSongAudio.length - 1) {
+                setAudio(PossibleSongAudio[0]);
+              } else {
+                setAudio(PossibleSongAudio[index + 1]);
+              }
+            }}
           >
             <icons.forward className="text-[20px] leading-[66%] icons icons_player"></icons.forward>
 
@@ -202,6 +274,7 @@ const PlayerBar = () => {
             <icons.repeat className="text-[20px] leading-[66%] icons icons_player"></icons.repeat>
           </div>
         </div>
+
         <div className="running_bar flex w-full items-center ">
           <span
             className="text-[12px] inline-block min-w-[45px] mr-[10px] time font-medium opacity-[0.5]"
@@ -212,15 +285,9 @@ const PlayerBar = () => {
           <div
             className=" w-full h-5  flex flex-col justify-center relative group cursor-pointer"
             ref={progressRef}
-            onClick={(event) => {
-              let progressRect = progressRef.current.getBoundingClientRect();
-              let offsetX = event.clientX - progressRect.left;
-              progressFillRef.current.style.width = `${offsetX}px`;
-              const timeLineWidth = progressRect.width;
-            }}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
-            // onMouseMove={handleMouseMove}
+            onClick={handleProgress}
           >
             <span className="z_bar z-0"></span>
             <span
@@ -231,7 +298,7 @@ const PlayerBar = () => {
             </span>
           </div>
           <span className="text-[12px] inline-block min-w-[45px] ml-[10px] time font-medium">
-            {moment.utc(3600).format("mm:ss")}
+            {moment.utc(duration * 1000).format("mm:ss")}
           </span>
         </div>
       </div>
@@ -255,8 +322,8 @@ const PlayerBar = () => {
               progressVolFill.current.style.width = `${offsetX}px`;
               const volumeValue =
                 Math.floor((offsetX / progressVolRect.width) * 100) / 100;
-              // audioRef.current.volume =
-              //   volumeValue > 1 ? 1 : volumeValue < 0 ? 0 : volumeValue;
+              audioRef.current.volume =
+                volumeValue > 1 ? 1 : volumeValue < 0 ? 0 : volumeValue;
             }}
             onMouseUp={handleVolMouseUp}
             onMouseDown={handleVolMouseDown}
@@ -285,25 +352,31 @@ const PlayerBar = () => {
         <RightSideBar appear={isAppear}></RightSideBar>
       </div>
       <div className="fixed bottom-[-100%] w-full h-[30px]">
-        {/* <audio
-            src={"https://a128-z3.zmdcdn.me/913ac02be4c8248446792481bfe838a7?authen=exp=1733582202~acl=/913ac02be4c8248446792481bfe838a7*~hmac=dc8085ad74ab467398a7d446b7a67c55"}
-            ref={audioRef}
-            onTimeUpdate={(e) => {
-              let { duration, currentTime } = e.target;
-              let percent = (currentTime / duration) * 100;
-              progressFillRef.current.style.width = `${percent}%`;
-              curtimeRef.current.textContent = moment
-                .utc(currentTime * 1000)
-                .format("mm:ss");
-            }}
-            // onEnded={handleEnd}
-            onPlaying={() => {
-              setPause(false);
-            }}
-            onPause={() => {
-              setPause(true);
-            }}
-          ></audio> */}
+        <audio
+          src={audio}
+          ref={audioRef}
+          onTimeUpdate={(e) => {
+            let { duration, currentTime } = e.target;
+            let percent = (currentTime / duration) * 100;
+            progressFillRef.current.style.width = `${percent}%`;
+            curtimeRef.current.textContent = moment
+              .utc(currentTime * 1000)
+              .format("mm:ss");
+          }}
+          onCanPlay={(e) => {
+            if (isPlaying) {
+              e.currentTarget.play();
+            }
+          }}
+          onLoadedMetadata={handleMetadata}
+          onEnded={handleEnd}
+          onPlaying={() => {
+            dispatch(setIsPlaying(true));
+          }}
+          onPause={() => {
+            dispatch(setIsPlaying(false));
+          }}
+        ></audio>
       </div>
     </PlayerBarStyled>
   );

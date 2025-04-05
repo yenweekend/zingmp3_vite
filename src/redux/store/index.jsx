@@ -5,6 +5,8 @@ import autoMergeLevel2 from "redux-persist/es/stateReconciler/autoMergeLevel2";
 import queueSongReducer from "../queueSong/slice";
 import authReducer from "../auth/slice";
 import collectionReducer from "../collection/slice";
+import songReducer from "../song/slice";
+
 const persistConfig = {
   key: "root",
   storage: storage,
@@ -18,10 +20,15 @@ const queueSongPersistConfig = {
   ...persistConfig,
   key: "queue_song",
 };
+const audioSongPersistConfig = {
+  ...persistConfig,
+  key: "audio",
+};
 
 const store = configureStore({
   reducer: {
     queueSong: persistReducer(queueSongPersistConfig, queueSongReducer),
+    songState: persistReducer(audioSongPersistConfig, songReducer),
     account: authReducer,
     collection: collectionReducer,
   },

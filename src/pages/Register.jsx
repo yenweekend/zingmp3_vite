@@ -4,29 +4,18 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { register } from "../apis/mongoose-api/auth.api";
+import { register as registerFunc } from "../apis/mongoose-api/auth.api";
 import setAuthToken from "../services/setAuthToken";
 import { setAccount } from "../redux/auth/slice";
+import { useForm } from "react-hook-form";
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
-  const [error, setError] = useState({
-    usernameError: "",
-    passwordError: "",
-  });
+
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const handleChange = useCallback(
-    (e) => {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    },
-    [formData]
-  );
+
   const mutation = useMutation({
-    mutationFn: register,
+    mutationFn: registerFunc,
     onSuccess: (response) => {
       setAuthToken(response.data.accessToken);
       localStorage.setItem("auth-token", response.data.accessToken);
@@ -46,28 +35,33 @@ const Register = () => {
       navigate("/");
     },
     onError: (error) => {
-      console.log(error.message);
+      setError("registerError", {
+        type: "custom",
+        message: error.response.data.message,
+      });
     },
   });
-  const handleRegister = useCallback(
-    (e) => {
-      e.preventDefault();
-      const isEmpty = Object.values(formData).some((value) => value === "");
-      if (isEmpty) {
-        console.log("ko để trường trống");
-      } else {
-        // console.log(formData);
-        mutation.mutate(formData);
-      }
+  const {
+    register,
+    setError,
+    clearErrors,
+    handleSubmit,
+    formState: { dirtyFields, errors },
+  } = useForm({
+    defaultValues: {
+      username: "",
+      password: "",
     },
-    [formData]
-  );
+  });
+  const onSubmit = async (data) => {
+    mutation.mutate(data);
+  };
   return (
     <div className="font-[sans-serif]">
       <div className="min-h-screen flex flex-col items-center justify-center">
         <div className="grid md:grid-cols-2 items-center gap-4 max-md:gap-8 max-w-6xl max-md:max-w-lg w-full p-4 m-4 shadow-[0_0_10px_-3px_rgba(6,81,237,0.3)] rounded-md">
           <div className="md:max-w-md w-full px-4 py-4">
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-12">
                 <h3 className="text-gray-800 text-3xl font-bold">Đăng ký</h3>
                 <p className="text-sm mt-4 text-gray-800">
@@ -87,13 +81,21 @@ const Register = () => {
                 </label>
                 <div className="relative flex items-center">
                   <input
-                    name="username"
+                    {...register("username", {
+                      required: {
+                        value: true,
+                        message: "Vui lòng điền tên đăng ký!",
+                      },
+                    })}
                     type="text"
-                    required
                     className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none"
                     placeholder="Điền tên đăng ký"
+                    onChange={() => {
+                      if (errors.registerError) {
+                        clearErrors("registerError");
+                      }
+                    }}
                     autoComplete="off"
-                    onChange={handleChange}
                   />
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -128,6 +130,11 @@ const Register = () => {
                     </g>
                   </svg>
                 </div>
+                {errors?.username && (
+                  <p className="text-red-700 text-[14px] font-medium">
+                    {errors.username.message}
+                  </p>
+                )}
               </div>
 
               <div className="mt-8">
@@ -136,13 +143,25 @@ const Register = () => {
                 </label>
                 <div className="relative flex items-center">
                   <input
-                    name="password"
+                    {...register("password", {
+                      required: {
+                        value: true,
+                        message: "Vui lòng điền mật khẩu !",
+                      },
+                      minLength: {
+                        value: 6,
+                        message: "Mật khẩu ít nhất 6 kí tự !",
+                      },
+                    })}
                     type={isPasswordVisible ? "text" : "password"}
-                    required
                     className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none"
                     placeholder="Nhập password"
+                    onChange={() => {
+                      if (errors.registerError) {
+                        clearErrors("registerError");
+                      }
+                    }}
                     autoComplete="off"
-                    onChange={handleChange}
                   />
                   <div
                     className="hidden_password absolute right-2 cursor-pointer"
@@ -171,12 +190,21 @@ const Register = () => {
                     )}
                   </div>
                 </div>
+                {errors?.password && (
+                  <p className="text-red-700 text-[14px] font-medium">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
+              {errors?.registerError && (
+                <p className="text-red-700 text-[14px] font-medium">
+                  {errors.registerError.message}
+                </p>
+              )}
               <div className="mt-12">
                 <button
-                  type="button"
+                  type="submit"
                   className="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                  onClick={handleRegister}
                 >
                   Đăng ký
                 </button>

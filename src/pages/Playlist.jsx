@@ -165,7 +165,7 @@ const Playlist = () => {
                           <input
                             type="checkbox"
                             name="song"
-                            className="p-[6px] cursor-pointer relative"
+                            className="p-[6px]  cursor-pointer relative"
                             value={song.encodeId}
                           />
                         </label>

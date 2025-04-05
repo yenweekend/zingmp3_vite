@@ -12,7 +12,18 @@ import generateUniqueId from "generate-unique-id";
 import { putQueueSong } from "../redux/queueSong/slice";
 import { useDispatch } from "react-redux";
 import { CollectPlaylistBtn, ViewMorePlaylistBtn } from "../components";
+import { useMutation } from "@tanstack/react-query";
+import { addBulkAudio } from "../apis/mongoose-api/song.api";
 const Album = () => {
+  const addBulkAudioMutation = useMutation({
+    mutationFn: addBulkAudio,
+    onSuccess: (data) => {
+      console.log(data.data.msg);
+    },
+    onError: (error) => {
+      toast(error.message);
+    },
+  });
   const dispatch = useDispatch();
   const viewRef = useRef(null);
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -67,6 +78,10 @@ const Album = () => {
       toast(`Đã thêm các bài hát vào danh sách phát`);
     }
   }, [data, songSelect]);
+  const handleAddBulkAudio = useCallback(() => {
+    const ids = songSelect.map((item) => item.encodeId);
+    addBulkAudioMutation.mutate({ data: ids });
+  }, [songSelect]);
   if (isPending) {
     return <Loading />;
   }
@@ -164,6 +179,13 @@ const Album = () => {
               {data.data.data?.sortDescription}
             </span>
           </div>
+          <button
+            type="button"
+            className="bg-white p-3 cursor-pointer "
+            onClick={handleAddBulkAudio}
+          >
+            Thêm
+          </button>
           <div className="list mb-[10px]">
             <div className="p-[10px] flex justify-between items-center song-list">
               <div className="flex items-center w-[50%]">
@@ -186,6 +208,7 @@ const Album = () => {
                     <icons.sort className="leading-[66%] text-[16px] secondary-text"></icons.sort>
                   </div>
                 )}
+
                 {songSelect.length > 0 ? (
                   <div className="flex items-center gap-3">
                     <div
