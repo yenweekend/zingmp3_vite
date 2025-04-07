@@ -4,6 +4,7 @@ import { Loading } from "../../components";
 import icons from "../../utils/icons";
 import { getPlaylistCollection } from "../../apis/mongoose-api/playlist.api";
 import { Playlist } from "../../components";
+import { Empty } from "../../components";
 const PlaylistCollect = () => {
   const { isPending, isError, error, data } = useQuery({
     queryKey: ["playlistcollection"],

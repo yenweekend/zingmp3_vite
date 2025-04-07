@@ -41,7 +41,6 @@ const SongCollectionList = ({ song, children }) => {
   const mutation = useMutation({
     mutationFn: deleteSongFromCollection,
     onSuccess: (data) => {
-      console.log(data);
       toast(`Đã xóa bài hát khỏi sưu tập`);
       queryClient.invalidateQueries({ queryKey: ["songcollection"] });
     },

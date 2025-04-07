@@ -28,7 +28,7 @@ const audioSongPersistConfig = {
 const store = configureStore({
   reducer: {
     queueSong: persistReducer(queueSongPersistConfig, queueSongReducer),
-    songState: persistReducer(audioSongPersistConfig, songReducer),
+    songState: songReducer,
     account: authReducer,
     collection: collectionReducer,
   },

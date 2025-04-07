@@ -21,6 +21,7 @@ const PlaylistPrivateList = () => {
   }
   if (isError) {
     toast(error.message);
+    return null;
   }
 
   return (

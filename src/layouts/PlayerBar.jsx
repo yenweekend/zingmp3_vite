@@ -20,9 +20,7 @@ import { Loader2, Pause } from "lucide-react";
 import { setIsPlaying } from "../redux/song/slice";
 import { useDispatch } from "react-redux";
 const PossibleSongAudio = [
-  "https://a128-z3.zmdcdn.me/2667eeae76859ab34357aff014bc0811?authen=exp=1743990524~acl=/2667eeae76859ab34357aff014bc0811*~hmac=7465b6137e3ebfad6827b7f0b3a0dbf2",
-  "https://vnno-ne-1-tf-a128-z3.zmdcdn.me/d9d28825e1436fbd1cd1cd693dcf95b7?authen=exp=1743990238~acl=/d9d28825e1436fbd1cd1cd693dcf95b7*~hmac=d933d0f7a206b9bf74d37aaf335edc12",
-  "https://a128-z3.zmdcdn.me/8332830835fd5b9f7d9a2131305475c9?authen=exp=1743991070~acl=/8332830835fd5b9f7d9a2131305475c9*~hmac=75d9571fe2a9c98cdc2676168ff22efd",
+  "https://p.scdn.co/mp3-preview/2f37da1d4221f40b9d1a98cd191f4d6f1646ad17",
 ];
 const PlayerBar = () => {
   const dispatch = useDispatch();

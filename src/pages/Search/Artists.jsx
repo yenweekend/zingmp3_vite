@@ -15,7 +15,6 @@ const Artists = () => {
     const normalizedString = decodedString
       .normalize("NFC")
       .replaceAll("+", " ");
-    console.log(normalizedString);
     return normalizedString;
   }, [search]);
   const { isPending, isError, data, error } = useQuery({

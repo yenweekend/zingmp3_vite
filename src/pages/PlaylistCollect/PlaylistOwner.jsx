@@ -10,54 +10,16 @@ import { PlaylistPrivateItem } from "../../components";
 import icons from "../../utils/icons";
 const PlaylistOwner = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const queryClient = useQueryClient();
   const { isPending, isError, error, data } = useQuery({
     queryKey: ["playlistcreated"],
     queryFn: getPlaylistCreated,
   });
-  const mutation = useMutation({
-    mutationFn: createPlaylist,
-    onSuccess: () => {
-      toast("Tạo Playlist mới thành công");
-      queryClient.invalidateQueries({ queryKey: ["playlistcreated"] });
-    },
-    onError: (error) => {
-      toast(error.message);
-    },
-  });
-  // const handleCreatePlaylist = useCallback(
-  //   (event) => {
-  //     event.preventDefault();
-  //     if (playlistName.title.trim().length === 0) {
-  //       return null;
-  //     }
-  //     const id = generateUniqueId({
-  //       length: 8,
-  //       useLetters: true,
-  //       useNumbers: true,
-  //     });
-  //     const strWithoutDiacritics = diacritics.remove(playlistName.title);
-  //     const upperID = id.toUpperCase();
-  //     const link = `/playlist/${strWithoutDiacritics.replaceAll(
-  //       " ",
-  //       "-"
-  //     )}/${upperID}`;
-  //     mutation.mutate({
-  //       ...playlistName,
-  //       encodeId: upperID,
-  //       link,
-  //       thumbnailM: "https://photo-zmp3.zmdcdn.me/album_default.png",
-  //     });
-  //     setIsModalOpen(false);
-  //   },
-  //   [playlistName]
-  // );
+
   if (isPending) {
     return <Loading />;
   }
   if (isError) {
     toast(error.message);
-    console.log(error.message);
   }
 
   return (
@@ -77,7 +39,7 @@ const PlaylistOwner = () => {
                 }}
               >
                 <div className=" flex flex-col items-center justify-center absolute inset-0   text-[15px]">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center border-solid border-[2px] border-[--primary-color] group-hover:border-[--link-text-hover]">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center border-solid border-[2px] border-[--text-primary] group-hover:border-[--link-text-hover]">
                     <icons.plus className="text-[20px] text-[--text-primary] group-hover:text-[--link-text-hover]"></icons.plus>
                   </div>
                   <div className="text-[14px] font-bold text-[--text-primary] group-hover:text-[--link-text-hover]">

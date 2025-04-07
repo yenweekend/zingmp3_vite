@@ -36,6 +36,7 @@ import setAuthToken from "./services/setAuthToken";
 import { useDispatch } from "react-redux";
 import { setAccount } from "./redux/auth/slice";
 import RedirectRoute from "./components/Route/RedirectRoute";
+import NotFound from "./components/NotFound";
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -135,8 +136,9 @@ function App() {
               element={<PlaylistCollect />}
             ></Route>
           </Route>
-          <Route path="/*" element={<Home />}></Route>
+          {/* <Route path="/*" element={<Home />}></Route> */}
         </Route>
+        <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </>
   );

@@ -32,6 +32,7 @@ const Videos = () => {
   const [fullScreen, setFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [autoPlay, setAutoPlay] = useState(false);
+  const [loadVideoError, setLoadVideoError] = useState(false);
   const [volumeValue, setVolumeValue] = useState(1);
   const { id } = useParams();
   const videoRef = useRef();
@@ -53,7 +54,6 @@ const Videos = () => {
   const [pause, setPause] = useState(true);
   const [recommends, setRecommends] = useState(null);
   const [videoSrc, setVideoSrc] = useState(null);
-
   const { isPending, isError, error, data } = useQuery({
     queryKey: ["video", id],
     queryFn: () => getVideo(id),
@@ -103,7 +103,7 @@ const Videos = () => {
           hls.attachMedia(video);
 
           hls.on(Hls.Events.ERROR, (event, data) => {
-            console.error("HLS error:", data);
+            setLoadVideoError(true);
           });
 
           // Cleanup on unmount (if you're using a framework like React)
@@ -112,6 +112,7 @@ const Videos = () => {
           // Safari or other browsers with native HLS support
           video.src = videoSrc;
         } else {
+          setLoadVideoError(true);
           console.error("HLS is not supported in this browser.");
         }
       }
@@ -426,6 +427,12 @@ const Videos = () => {
                             }}
                             ref={emptyRef}
                           >
+                            {loadVideoError && (
+                              <div className="absolute inset-0 z-[999]  bg-[#333] flex text-white  items-center justify-center">
+                                Trình duyệt không thể tải video này!
+                              </div>
+                            )}
+
                             <video
                               id="video"
                               // controls

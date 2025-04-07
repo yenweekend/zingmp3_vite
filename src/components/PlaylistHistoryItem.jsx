@@ -14,7 +14,9 @@ import { useDispatch } from "react-redux";
 import HISTORY_KEY, { deleteFromHistory } from "../helpers/history";
 import { addPlaylistToCollection } from "../apis/mongoose-api/playlist.api";
 import { Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 const PlaylistHistoryItem = ({ playlistData, setPlaylistData }) => {
+  const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const viewRef = useRef(null);
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -47,7 +49,8 @@ const PlaylistHistoryItem = ({ playlistData, setPlaylistData }) => {
   const collectMutation = useMutation({
     mutationFn: addPlaylistToCollection,
     onSuccess: (data) => {
-      console.log(data);
+      toast(`Đã thêm ${playlistData.title} vào thư viện`);
+      queryClient.invalidateQueries({ queryKey: ["playlistcollection"] });
     },
     onError: (error) => {
       console.log(error);

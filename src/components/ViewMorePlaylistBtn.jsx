@@ -6,10 +6,13 @@ import { getAlbum } from "../apis/zing-api/album.api";
 import toast from "../helpers/notification";
 import icons from "../utils/icons";
 import { queueSongSelector } from "../redux/queueSong/selector";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import generateUniqueId from "generate-unique-id";
 import { setSongId, putQueueSong } from "../redux/queueSong/slice";
+import { use } from "react";
+
 const ViewMorePlaylistBtn = ({ playlistData, textWhite = true }) => {
+  const dispatch = useDispatch();
   const queueSong = useSelector(queueSongSelector);
   const viewRef = useRef(null);
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -44,6 +47,7 @@ const ViewMorePlaylistBtn = ({ playlistData, textWhite = true }) => {
       toast(`Đã thêm playlist ${playlistData.title} vào danh sách phát`);
     },
     onError: (error) => {
+      console.log(error);
       toast("Thêm vào danh sách phát không thành công !");
     },
   });

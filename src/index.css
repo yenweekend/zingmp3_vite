@@ -386,3 +386,45 @@ body {
 .screen-bg {
   background-image: var(--background-image);
 }
+
+.btn-hover-effect {
+  position: relative;
+  color: var(--purple-primary);
+  border: 1px solid var(--purple-primary);
+  background: var(--purple-primary);
+  text-transform: initial;
+  font-size: 14px;
+  padding: 10px 25px;
+  overflow: hidden;
+  display: inline-block;
+  z-index: 1;
+  line-height: normal;
+  letter-spacing: 1px;
+  outline: none;
+  transition: color 0.45s cubic-bezier(0.785, 0.135, 0.15, 0.86),
+    border 0.45s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+.btn-hover-effect::before {
+  content: "";
+  background: #fff;
+  position: absolute !important;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  right: -2px;
+  z-index: -1;
+  box-sizing: border-box;
+  transform: scale(1, 1);
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.785, 0.135, 0.15, 0.86),
+    -webkit-transform 0.45s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+.btn-hover-effect:hover {
+  color: #fff;
+  border-color: var(--purple-primary);
+}
+.btn-hover-effect:hover::before {
+  transform-origin: right center;
+  transform: scale(0, 1);
+  /* background: #fff; */
+}
